@@ -8,4 +8,4 @@ cd /home/plotter/
 git clone https://github.com/tualo/piplot
 cd piplot
 npm i
-cp plotter.service /lib/systemd/system/plotter.service
+sudo cp plotter.service /lib/systemd/system/plotter.service
