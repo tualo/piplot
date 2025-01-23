@@ -39,7 +39,7 @@ rest.use(session({
 }))
 
 // JSON
-rest.use(express.json());
+rest.use(express.json({limit: '50mb'}));
 
 let linesTotal = 0;
 // Main
