@@ -8,20 +8,7 @@ const ConfigHandler = require('./lib/config.js');
 const config = ConfigHandler.getConfig();
 
 
-const tty = '/dev/ttyUSB0'
-const options = {
-    //path: tty,
-//    baudRate: 9600,
-    //dataBits: 7,
-    //stopBits: 2,
-    //parity: "none",
-    //lock: false,
 
-
-    xon: true,
-    xoff: true
-
-}
 
 
 var express = require('express')
@@ -71,7 +58,14 @@ var http = require('http');
 rest.get('/plotter', function (req, res) {
     var data = {};
     data.config = config;
-    // res.render('printer', data);
+    data.portsList = [];
+
+    SerialPort.list((err, ports)=>{
+        ports.forEach((ports)=>{
+          data.portsList.push(ports.comName);
+        });
+      });
+
     res.json(data);
 });
 
@@ -130,7 +124,24 @@ rest.get('/plot', function (req, res) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     
+
+    const tty = '/dev/ttyUSB0';
+    const options = {
+        //path: tty,
+    //    baudRate: 9600,
+        //dataBits: 7,
+        //stopBits: 2,
+        //parity: "none",
+        //lock: false,
+
+
+        xon: true,
+        xoff: true
+
+    }
+
     const port = new SerialPort(tty, options, handleErrors);
+    port.
     port.setEncoding('ascii');
     
   
