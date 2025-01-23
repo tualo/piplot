@@ -148,9 +148,9 @@ rest.get('/plot', function (req, res) {
     const parser = port.pipe(new Readline({
         delimiter: '\r\n',
         encoding: 'ascii',
-      }));
-      parser.on('data', handleResponse);
-    
+    }));
+    parser.on('data', handleResponse);
+    port.open();
     let lines = hpgl.split("\n");
     
     
