@@ -259,7 +259,7 @@ rest.post('/file', function (req, res) {
             
             const { exec } = require('child_process');
             console.log('pstoedit-f plot-hpgl '+input+' '+output);
-            exec('pstoedit -f plot-hpgl '+input+' '+output, (err, stdout, stderr) => {
+            exec('pstoedit -f plot-hpgl '+input+' '+output, {maxBuffer: 1024 * 5000} , (err, stdout, stderr) => {
                 if (err) {
                     console.log(err);
                     // node couldn't execute the command
@@ -275,7 +275,7 @@ rest.post('/file', function (req, res) {
 
                 const { exec } = require('child_process');
                 console.log('pstoedit-f plot-hpgl '+input+' '+output);
-                exec('./simplify '+output, (err, stdout, stderr) => {
+                exec('./simplify '+output, {maxBuffer: 1024 * 5000} , (err, stdout, stderr) => {
                     if (err) {
                         console.log(err);
                         // node couldn't execute the command
