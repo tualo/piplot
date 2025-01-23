@@ -105,23 +105,25 @@ rest.get('/plot', function (req, res) {
     const child = spawn('./send2plt', ['./spooler/file.hpgl']);
 
     child.stdout.on('data', (data) => {
+        data.success=true;
         console.log(`stdout:\n${data}`);
     });
 
     child.stderr.on('data', (data) => {
+        data.success=false;
         console.error(`stderr: ${data}`);
     });
 
     child.on('error', (error) => {
+        data.success=false;
         console.error(`error: ${error.message}`);
     });
 
     child.on('close', (code) => {
         console.log(`child process exited with code ${code}`);
+        res.json(data);
     });
 
-    data.success=true;
-    res.json(data);
     /*
     const { exec } = require('child_process');
     exec('./send2plt ./spooler/file.hpgl', (err, stdout, stderr) => {
