@@ -111,11 +111,21 @@ rest.get('/plot', function (req, res) {
     // const child = spawn('./send2plt', ['./spooler/file.hpgl']);
 
     const hpgl = fs.readFileSync('./spooler/file.hpgl', 'ascii')
-    
+    let lines = hpgl.split("\n");
+    const tty = '/dev/ttyUSB0';
+    const options = {
+        autoOpen: false,
+        xon: true,
+        xoff: true
+
+    }
+    linesTotal = lines.length;
+
     
     
     function handleErrors (err) {
-        if (err) console.error(err)
+        console.error('handleErrors*',err)
+        if (err) console.error('handleErrors',err)
         data.success=false;
     }
     function handleResponse(data) {
@@ -127,20 +137,7 @@ rest.get('/plot', function (req, res) {
     }
     
 
-    const tty = '/dev/ttyUSB0';
-    const options = {
-        //path: tty,
-    //    baudRate: 9600,
-        //dataBits: 7,
-        //stopBits: 2,
-        //parity: "none",
-        //lock: false,
 
-        autoOpen: false,
-        xon: true,
-        xoff: true
-
-    }
 
     const port = new SerialPort(tty, options, handleErrors);
     port.setEncoding('ascii');
@@ -151,8 +148,6 @@ rest.get('/plot', function (req, res) {
     }));
     parser.on('data', handleResponse);
     
-    let lines = hpgl.split("\n");
-    
     port.on('open',(m)=>{
         console.log('open',tty,m);
         run();
@@ -162,7 +157,6 @@ rest.get('/plot', function (req, res) {
     })
     port.open();
 
-    linesTotal = lines.length;
     async function run(){
     
         port.get( (error, data) => {
