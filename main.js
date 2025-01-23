@@ -1,9 +1,27 @@
-var fs = require('fs');
-var path = require('path');
-var request = require('request');
+const fs = require('fs');
+const path = require('path');
+const request = require('request');
+const SerialPort = require('serialport');
+const Readline = SerialPort.parsers.Readline;
 
 const ConfigHandler = require('./lib/config.js');
 const config = ConfigHandler.getConfig();
+
+
+const tty = '/dev/ttyUSB0'
+const options = {
+    //path: tty,
+//    baudRate: 9600,
+    //dataBits: 7,
+    //stopBits: 2,
+    //parity: "none",
+    //lock: false,
+
+
+    xon: true,
+    xoff: true
+
+}
 
 
 var express = require('express')
@@ -97,13 +115,69 @@ rest.get('/plot', function (req, res) {
     var data = {
         success: false
     };
+    // const { spawn } = require('child_process');
+    // const child = spawn('./send2plt', ['./spooler/file.hpgl']);
+
+    const hpgl = fs.readFileSync('./spooler/file.hpgl', 'ascii')
     
     
+    
+    function handleErrors (err) {
+        if (err) console.error(err)
+        data.success=false;
+    }
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    const port = new SerialPort(tty, options, handleErrors);
+    port.setEncoding('ascii');
+    
+    const parser = port.pipe(new Readline({
+              delimiter: '\r\n',
+              encoding: 'ascii',
+            }));
+            parser.on('data', handleResponse);
+    
+    
+    let lines = hpgl.split("\n");
+    
+    
+    const linesTotal = lines.length;
+    async function run(){
+    
+        port.get( (error, data) => {
+            console.log(error, data);
+        })
+    
+        let cmd = lines.shift();
+        port.write(cmd, handleErrors);
 
-    const { spawn } = require('child_process');
+        if (data.success===false){
+            res.json(data);
+            return;
+        }
 
-    const child = spawn('./send2plt', ['./spooler/file.hpgl']);
+        await sleep(25);
+        // console.log(linesTotal,lines.length)
+    
+        if (lines.length>0){
+            run();
+        }else{
+    
+            //port.flush();
+            await sleep(2000);
+            port.close();
+            console.log("finished");
+            data.success=true;
+            res.json(data);
+        }
+    
+    }
+    
+    run();
 
+    /*
     child.stdout.on('data', (data) => {
         data.success=true;
         console.log(`stdout:\n${data}`);
@@ -124,6 +198,7 @@ rest.get('/plot', function (req, res) {
         console.log(`child process exited with code ${code}`);
         res.json(data);
     });
+    */
 
     /*
     const { exec } = require('child_process');

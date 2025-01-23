@@ -72,21 +72,7 @@ async function run(){
         port.close();
         console.log("finished");
     }
-/*
-port.write("LT;", handleErrors);
-await sleep(20);
-port.write("SP1;", handleErrors);
-await sleep(20);
-port.write("PU0,400;", handleErrors);
-await sleep(200);
-port.write("SP0;", handleErrors);
-//await sleep(20);
-port.write("PU0,0;", handleErrors);
-port.flush();
-await sleep(2000);
-port.close();
-console.log("done");
-*/
+
 }
 
 run();
