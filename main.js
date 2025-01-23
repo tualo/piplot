@@ -136,7 +136,7 @@ rest.get('/plot', function (req, res) {
         //parity: "none",
         //lock: false,
 
-
+        autoOpen: false,
         xon: true,
         xoff: true
 
