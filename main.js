@@ -105,7 +105,6 @@ rest.get('/status', function (req, res) {
 
 rest.get('/plot', function (req, res) {
     var data = {
-        success: false
     };
     // const { spawn } = require('child_process');
     // const child = spawn('./send2plt', ['./spooler/file.hpgl']);
@@ -168,6 +167,7 @@ rest.get('/plot', function (req, res) {
         port.write(cmd, handleErrors);
 
         if (data.success===false){
+            port.close();
             res.json(data);
             return;
         }
