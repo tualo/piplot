@@ -133,12 +133,7 @@ rest.get('/plot', function (req, res) {
     const port = new SerialPort(tty, options, handleErrors);
     port.setEncoding('ascii');
     
-    const parser = port.pipe(new Readline({
-              delimiter: '\r\n',
-              encoding: 'ascii',
-            }));
-            parser.on('data', handleResponse);
-    
+  
     
     let lines = hpgl.split("\n");
     
