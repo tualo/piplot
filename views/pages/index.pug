@@ -104,7 +104,10 @@ block content
                 i.fas.fa-table.me-1
                 | Schneiden
             .card-body
-                button#plot_button(type="button" class="btn btn-primary") Starten
+                .mb-4
+                    button#plot_button(type="button" class="btn btn-primary") Starten
+                .mb-4
+                    #plot_message.alert &nbsp;
 
 append scripts
     //- Load Chart.js and demos
