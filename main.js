@@ -115,8 +115,9 @@ rest.get('/plot', function (req, res) {
     });
 
     child.on('error', (error) => {
-        data.success=false;
         console.error(`error: ${error.message}`);
+        data.success=false;
+        child.kill();
     });
 
     child.on('close', (code) => {
