@@ -41,7 +41,7 @@ rest.use(session({
 // JSON
 rest.use(express.json());
 
-
+let linesTotal = 0;
 // Main
 rest.get('/', function(req, res) {
     var data = {};
@@ -139,7 +139,6 @@ rest.get('/plot', function (req, res) {
     }
 
     const port = new SerialPort(tty, options, handleErrors);
-    port.
     port.setEncoding('ascii');
     
   
@@ -147,7 +146,7 @@ rest.get('/plot', function (req, res) {
     let lines = hpgl.split("\n");
     
     
-    const linesTotal = lines.length;
+    linesTotal = lines.length;
     async function run(){
     
         port.get( (error, data) => {
