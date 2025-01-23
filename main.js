@@ -55,18 +55,15 @@ var WebSocketServer = require('websocket').server;
 var http = require('http');
 
 // Printer
-rest.get('/plotter', function (req, res) {
+rest.get('/plotter', async function (req, res) {
     var data = {};
     data.config = config;
     data.portsList = [];
 
-    SerialPort.list((err, ports)=>{
-        console.log(ports);
-        ports.forEach((ports)=>{
-          data.portsList.push(ports.comName);
-        });
-      });
-
+    let ports = await SerialPort.list();
+    ports.forEach((ports)=>{
+        data.portsList.push(ports.comName);
+    });
     res.json(data);
 });
 
