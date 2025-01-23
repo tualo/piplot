@@ -124,9 +124,10 @@ rest.get('/plot', function (req, res) {
     
     
     function handleErrors (err) {
-        console.error('handleErrors*',err)
-        if (err) console.error('handleErrors',err)
-        data.success=false;
+        if (err){ 
+            console.error('handleErrors',err)
+            data.success=false;
+        }
     }
     function handleResponse(data) {
         console.log('Rx', data);
