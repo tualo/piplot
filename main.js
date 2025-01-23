@@ -118,6 +118,10 @@ rest.get('/plot', function (req, res) {
         if (err) console.error(err)
         data.success=false;
     }
+    function handleResponse(data) {
+        console.log('Rx', data);
+    }
+
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -141,7 +145,11 @@ rest.get('/plot', function (req, res) {
     const port = new SerialPort(tty, options, handleErrors);
     port.setEncoding('ascii');
     
-  
+    const parser = port.pipe(new Readline({
+        delimiter: '\r\n',
+        encoding: 'ascii',
+      }));
+      parser.on('data', handleResponse);
     
     let lines = hpgl.split("\n");
     
