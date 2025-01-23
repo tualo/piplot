@@ -61,6 +61,7 @@ rest.get('/plotter', function (req, res) {
     data.portsList = [];
 
     SerialPort.list((err, ports)=>{
+        console.log(ports);
         ports.forEach((ports)=>{
           data.portsList.push(ports.comName);
         });
