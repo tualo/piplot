@@ -150,10 +150,18 @@ rest.get('/plot', function (req, res) {
         encoding: 'ascii',
     }));
     parser.on('data', handleResponse);
-    port.open();
+    
     let lines = hpgl.split("\n");
     
-    
+    port.on('open',(m)=>{
+        console.log('open',tty,m);
+        run();
+    })
+    port.on('error',(e)=>{
+        console.log('error',tty,e);
+    })
+    port.open();
+
     linesTotal = lines.length;
     async function run(){
     
@@ -186,7 +194,6 @@ rest.get('/plot', function (req, res) {
     
     }
     
-    run();
 
     /*
     child.stdout.on('data', (data) => {
