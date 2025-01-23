@@ -1,0 +1,92 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const SerialPort = require('serialport');
+const Readline = SerialPort.parsers.Readline;
+
+function handleResponse(data) {
+  console.log('Rx', data);
+  console.log();
+}
+
+const tty = '/dev/ttyUSB0'
+const options = {
+    //path: tty,
+//    baudRate: 9600,
+    //dataBits: 7,
+    //stopBits: 2,
+    //parity: "none",
+    //lock: false,
+
+
+    xon: true,
+    xoff: true
+
+}
+
+const inFile = process.argv[2];
+console.log(`Plotting ${inFile}`)
+const hpgl = fs.readFileSync(inFile, 'ascii')
+
+
+
+function handleErrors (err) {
+    if (err) console.error(err)
+}
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const port = new SerialPort(tty, options, handleErrors);
+port.setEncoding('ascii');
+
+const parser = port.pipe(new Readline({
+          delimiter: '\r\n',
+          encoding: 'ascii',
+        }));
+        parser.on('data', handleResponse);
+
+
+let lines = hpgl.split("\n");
+
+
+const linesTotal = lines.length;
+async function run(){
+
+    port.get( (error, data) => {
+        console.log(error, data);
+    })
+
+    let cmd = lines.shift();
+    // console.log(cmd);
+    port.write(cmd, handleErrors);
+    //port.flush();
+    await sleep(25);
+    console.log(linesTotal,lines.length)
+
+    if (lines.length>0){
+        run();
+    }else{
+
+        //port.flush();
+        await sleep(2000);
+        port.close();
+        console.log("finished");
+    }
+/*
+port.write("LT;", handleErrors);
+await sleep(20);
+port.write("SP1;", handleErrors);
+await sleep(20);
+port.write("PU0,400;", handleErrors);
+await sleep(200);
+port.write("SP0;", handleErrors);
+//await sleep(20);
+port.write("PU0,0;", handleErrors);
+port.flush();
+await sleep(2000);
+port.close();
+console.log("done");
+*/
+}
+
+run();

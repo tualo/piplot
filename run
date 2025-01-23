@@ -1,0 +1,4 @@
+#/bin/bash
+pstoedit -f plot-hpgl $1 file.hpgl
+/home/thomas/Plotter/simplify file.hpgl
+/home/thomas/Plotter/send2plt file.hpgl
