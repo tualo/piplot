@@ -39,11 +39,11 @@ rest.use(session({
 }))
 
 // JSON
-rest.use(express.json({limit: '50mb'}));
+rest.use(express.json({ limit: '50mb' }));
 
 let linesTotal = 0;
 // Main
-rest.get('/', function(req, res) {
+rest.get('/', function (req, res) {
     var data = {};
     data.config = config;
     data.timespan = req.session.timespan ? req.session.timespan : 24;
@@ -61,7 +61,7 @@ rest.get('/plotter', async function (req, res) {
     data.portsList = [];
 
     let ports = await SerialPort.list();
-    ports.forEach((ports)=>{
+    ports.forEach((ports) => {
         data.portsList.push(ports.comName);
     });
     res.json(data);
@@ -74,17 +74,17 @@ rest.get('/status', function (req, res) {
 
     const { spawn } = require('child_process');
 
-    const child = spawn('wpa_cli', ['-i','wlan0','status']);
+    const child = spawn('wpa_cli', ['-i', 'wlan0', 'status']);
 
     child.stdout.on('data', (data) => {
         let cmdres = data.toString().split("\n");
         let status = {};
-        cmdres.forEach((l)=>{
-            let p=l.split("=");
-            if (p.length==2) status[p[0].trim()]=p[1].trim()
+        cmdres.forEach((l) => {
+            let p = l.split("=");
+            if (p.length == 2) status[p[0].trim()] = p[1].trim()
         })
         result.wifi_status = status;
-        result.success=true;
+        result.success = true;
         console.log(`stdout:\n${data}`);
     });
 
@@ -120,12 +120,12 @@ rest.get('/plot', function (req, res) {
     }
     linesTotal = lines.length;
 
-    
-    
-    function handleErrors (err) {
-        if (err){ 
-            console.error('handleErrors',err)
-            data.success=false;
+
+
+    function handleErrors(err) {
+        if (err) {
+            console.error('handleErrors', err)
+            data.success = false;
         }
     }
     function handleResponse(data) {
@@ -135,38 +135,38 @@ rest.get('/plot', function (req, res) {
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    
+
 
 
 
     const port = new SerialPort(tty, options, handleErrors);
     port.setEncoding('ascii');
-    
+
     const parser = port.pipe(new Readline({
         delimiter: '\r\n',
         encoding: 'ascii',
     }));
     parser.on('data', handleResponse);
-    
-    port.on('open',(m)=>{
-        console.log('open',tty,m);
+
+    port.on('open', (m) => {
+        console.log('open', tty, m);
         run();
     })
-    port.on('error',(e)=>{
-        console.log('error',tty,e);
+    port.on('error', (e) => {
+        console.log('error', tty, e);
     })
     port.open();
 
-    async function run(){
-    
-        port.get( (error, data) => {
+    async function run() {
+
+        port.get((error, data) => {
             console.log(error, data);
         })
-    
+
         let cmd = lines.shift();
         port.write(cmd, handleErrors);
 
-        if (data.success===false){
+        if (data.success === false) {
             port.close();
             res.json(data);
             return;
@@ -174,21 +174,21 @@ rest.get('/plot', function (req, res) {
 
         await sleep(25);
         // console.log(linesTotal,lines.length)
-    
-        if (lines.length>0){
+
+        if (lines.length > 0) {
             run();
-        }else{
-    
+        } else {
+
             //port.flush();
             await sleep(2000);
             port.close();
             console.log("finished");
-            data.success=true;
+            data.success = true;
             res.json(data);
         }
-    
+
     }
-    
+
 
     /*
     child.stdout.on('data', (data) => {
@@ -235,7 +235,7 @@ rest.get('/plot', function (req, res) {
         res.json(data);
     });
     */
-    
+
 
 });
 
@@ -243,23 +243,23 @@ rest.post('/file', function (req, res) {
     var data = {
         success: false
     };
-    
-    
-    if (req.body.data){
+
+
+    if (req.body.data) {
         let x = req.body.data.split(',');
-        if (x[0]=='data:application/postscript;base64'){
+        if (x[0] == 'data:application/postscript;base64') {
             fs.writeFileSync(
-                path.join('.','spooler','file.eps'),
+                path.join('.', 'spooler', 'file.eps'),
                 buf = Buffer.from(x[1], 'base64')
             );
-            
 
-            let input = path.join('.','spooler','file.eps');
-            let output = path.join('.','spooler','file.hpgl');
-            
+
+            let input = path.join('.', 'spooler', 'file.eps');
+            let output = path.join('.', 'spooler', 'file.hpgl');
+
             const { exec } = require('child_process');
-            console.log('pstoedit-f plot-hpgl '+input+' '+output);
-            exec('pstoedit -f plot-hpgl '+input+' '+output, {maxBuffer: 1024 * 5000} , (err, stdout, stderr) => {
+            console.log('pstoedit-f plot-hpgl ' + input + ' ' + output);
+            exec('pstoedit -f plot-hpgl ' + input + ' ' + output, { maxBuffer: 1024 * 5000 }, (err, stdout, stderr) => {
                 if (err) {
                     console.log(err);
                     // node couldn't execute the command
@@ -270,12 +270,12 @@ rest.post('/file', function (req, res) {
                 console.log(`stdout: ${stdout}`);
                 console.log(`stderr: ${stderr}`);
 
-                data.success=true;
-                data.hpgl=fs.readFileSync(output).toString();
+                data.success = true;
+                data.hpgl = fs.readFileSync(output).toString();
 
                 const { exec } = require('child_process');
-                console.log('pstoedit-f plot-hpgl '+input+' '+output);
-                exec('./simplify '+output, {maxBuffer: 1024 * 5000} , (err, stdout, stderr) => {
+                console.log('pstoedit-f plot-hpgl ' + input + ' ' + output);
+                exec('./simplify ' + output, { maxBuffer: 1024 * 5000 }, (err, stdout, stderr) => {
                     if (err) {
                         console.log(err);
                         // node couldn't execute the command
@@ -286,28 +286,28 @@ rest.post('/file', function (req, res) {
                     console.log(`stdout: ${stdout}`);
                     console.log(`stderr: ${stderr}`);
 
-                    data.success=true;
-                    data.hpgl=fs.readFileSync(output).toString();
-                    data.info=JSON.parse(fs.readFileSync(output+'.info.json').toString());
+                    data.success = true;
+                    data.hpgl = fs.readFileSync(output).toString();
+                    data.info = JSON.parse(fs.readFileSync(output + '.info.json').toString());
                     res.json(data);
                 });
 
                 // res.json(data);
             });
 
-            
+
         }
     }
-    
+
 });
 
 // starting rest
 if (config.public) {
-    rest.listen(config.port, function() {
+    rest.listen(config.port, function () {
         console.log((new Date()) + " REST is listening on port %d in %s mode", config.port, "public");
     });
 } else {
-    rest.listen(config.port, 'localhost', function() {
+    rest.listen(config.port, 'localhost', function () {
         console.log((new Date()) + " REST is listening on port %d in %s mode", config.port, "localhost");
     });
 }
