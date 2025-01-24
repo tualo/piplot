@@ -5,57 +5,61 @@ console.log(`Processing ${inFile}`)
 const hpgl = fs.readFileSync(inFile, 'ascii')
 
 let lines = hpgl.split(";");
-let mode='PU';
+let mode = 'PU';
 let cmds = [];
-let result =['LT;' /*,'SP1;'*/]
-let xy=[];
-let minx=999999;
-let miny=999999;
+let result = ['LT;' /*,'SP1;'*/]
+let xy = [];
+let minx = 999999;
+let miny = 999999;
 
-let maxx=0;
-let maxy=0;
+let maxx = 0;
+let maxy = 0;
 
+let scale = 1.123595506;
 
-function pos(row){
-    if (row.length>2){
-let ps = row.substring(2).split(",");
-ps.forEach((p)=>{
-    xy.push(p);
-    if (xy.length==2){
-        if((xy[0]!='0') && (xy[1]!='0')){
-            minx=Math.min(minx,parseInt(xy[0]));
-            miny=Math.min(miny,parseInt(xy[1]));
-            maxx=Math.max(maxx,parseInt(xy[0]));
-            maxy=Math.max(maxy,parseInt(xy[1]));
-        }
-        cmds.push(mode+''+xy.join(',')+';');
-        xy=[];
+function pos(row) {
+    if (row.length > 2) {
+        let ps = row.substring(2).split(",");
+        ps.forEach((p) => {
+            xy.push(p);
+            if (xy.length == 2) {
+                xy[0] = xy[0] * scale;
+                xy[1] = xy[1] * scale;
+
+                if ((xy[0] != '0') && (xy[1] != '0')) {
+                    minx = Math.min(minx, parseInt(xy[0]));
+                    miny = Math.min(miny, parseInt(xy[1]));
+                    maxx = Math.max(maxx, parseInt(xy[0]));
+                    maxy = Math.max(maxy, parseInt(xy[1]));
+                }
+                cmds.push(mode + '' + xy.join(',') + ';');
+                xy = [];
+            }
+        });
+    }
+}
+lines.forEach((row) => {
+    if (row.substring(0, 2) == 'PD') {
+        mode = 'PD';
+        pos.bind(this)(row);
+    }
+    if (row.substring(0, 2) == 'PU') {
+        mode = 'PU';
+        pos.bind(this)(row);
+    }
+    if (row.substring(0, 2) == 'PA') {
+        pos.bind(this)(row);
     }
 });
-}
-}
-lines.forEach((row)=>{
-    if(row.substring(0,2)=='PD'){
-        mode='PD';
-        pos.bind(this)(row);
-    }
-    if(row.substring(0,2)=='PU'){
-        mode='PU';
-        pos.bind(this)(row);
-    }
-    if(row.substring(0,2)=='PA'){
-        pos.bind(this)(row);
-    }
-});
 
 
-        
-cmds.forEach((row)=>{
-    let ps = row.substring(2).replace(";","").split(",");
-    if (row!='PU0,0;'){
-	result.push(row.substring(0,2) + (parseInt(ps[0])-minx) +','+ (parseInt(ps[1])-miny) +';');
-    }else{
-	result.push(result[result.length-1].replace('PD','PU'));
+
+cmds.forEach((row) => {
+    let ps = row.substring(2).replace(";", "").split(",");
+    if (row != 'PU0,0;') {
+        result.push(row.substring(0, 2) + (parseInt(ps[0]) - minx) + ',' + (parseInt(ps[1]) - miny) + ';');
+    } else {
+        result.push(result[result.length - 1].replace('PD', 'PU'));
         result.push(row);
     }
 });
@@ -67,13 +71,13 @@ console.log(result.join("\n"));
 
 
 fs.writeFileSync(inFile, result.join("\n"));
-fs.writeFileSync(inFile+'.info.json', JSON.stringify({
+fs.writeFileSync(inFile + '.info.json', JSON.stringify({
     minx: minx,
     miny: miny,
     maxx: maxx,
     maxy: maxy,
-    
+
 }));
 
-console.log(minx,miny);
+console.log(minx, miny);
 
